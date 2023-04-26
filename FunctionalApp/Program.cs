@@ -94,7 +94,10 @@ namespace FunctionalApp
 
         public static void BuyInstruments(List<Instrument> selectedInstruments) //Функция для уменьшения количества купленного товара
         {
-
+            foreach (var instrument in selectedInstruments)
+            {
+                instrument.Quantity--;
+            }
         }
     }
 
