@@ -321,6 +321,12 @@ namespace FunctionalApp
 
             // вывод информации о товаре, который будет удален
             Console.WriteLine("Удаляемый товар:");
+            Console.Write("Введите Y, чтобы подтвердить, или любой другой символ, чтобы отменить: ");
+            if (Console.ReadLine().ToLower() != "y")
+            {
+                Console.WriteLine("Удаление товара отменено.");
+                return;
+            }
             Console.WriteLine(productToRemove);
 
             // удаление товара из списка
