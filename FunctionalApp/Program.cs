@@ -30,7 +30,7 @@ namespace FunctionalApp
         }
     }
 
-    class FileReader //Для считывания данных из файла в структуру
+    class FileManager //Для считывания данных из файла в структуру
     {
         public static List<Instrument> ReadInstrumentsFromFile(string fileName)
         {
@@ -92,11 +92,26 @@ namespace FunctionalApp
             }
         }
 
+        public static void BuyInstruments(List<Instrument> selectedInstruments) //Функция для уменьшения количества купленного товара
+        {
+
+        }
     }
 
     class ProgramClient //Функционал программы для клиента
     {
-        public static List<Instrument> SelectInstruments(List<Instrument> instruments, int numInstruments)
+        public static void DisplayInstruments(List<Instrument> instruments) //Показывает все товары
+        {
+            Console.WriteLine("Список товаров:");
+            Console.WriteLine();
+
+            foreach (Instrument instrument in instruments)
+            {
+                Console.WriteLine($"{instrument.Brand} ({instrument.Type}), цена: {instrument.Price}, количество: {instrument.Quantity}");
+            }
+        }
+
+        public static List<Instrument> SelectInstruments(List<Instrument> instruments, int numInstruments) //Выбор инструментов для покупки
         {
             Console.WriteLine("Выберите инструменты:");
 
@@ -132,7 +147,7 @@ namespace FunctionalApp
             return selectedInstruments;
         }
 
-        public static double CalculateTotalCost(List<Instrument> selectedInstruments)
+        public static double CalculateTotalCost(List<Instrument> selectedInstruments) //Считает сумму выбранных инструментов
         {
             double totalCost = 0;
             foreach (var instrument in selectedInstruments)
@@ -141,9 +156,7 @@ namespace FunctionalApp
             }
             return totalCost;
         }
-
     }
-
     class ProgramCusomer //Функционал программы для продавца
     {
 
@@ -159,54 +172,97 @@ namespace FunctionalApp
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
             Console.CancelKeyPress += new ConsoleCancelEventHandler(OnCancelKeyPress);
 
-            instruments = FileReader.ReadInstrumentsFromFile("instruments.csv");
+            instruments = FileManager.ReadInstrumentsFromFile("instruments.csv");
 
             // Вывод меню выбора режима работы программы
             Console.WriteLine("Выберите режим работы программы:");
             Console.WriteLine("1 - для работы с программой в режиме клиента");
             Console.WriteLine("2 - для работы с программой в режиме продавца");
-           
+            Console.WriteLine("3 - для завершения работы с программой");
+
             int mode;
-            
-            while (!int.TryParse(Console.ReadLine(), out mode))
+
+            while (true)
             {
-                Console.WriteLine("Некорректный выбор. Пожалуйста, выберите 1 или 2.");
+                if (!int.TryParse(Console.ReadLine(), out mode) || mode < 1 || mode > 3)
+                {
+                    Console.WriteLine("Некорректный выбор. Пожалуйста, выберите от 1 до 3.");
+                }
+                else
+                {
+                    break;
+                }
             }
 
             // Обработка выбора режима работы программы
             if (mode == 1)
             {
                 // Логика программы для клиента
-                Console.WriteLine("Сколько инструментов Вы хотите приобрести?");
-                int numInstruments;
-                while (!int.TryParse(Console.ReadLine(), out numInstruments) || numInstruments <= 0 || numInstruments >= 101)
+                while (true)
                 {
-                    Console.WriteLine("Некорректное количество. Пожалуйста, введите положительное целое число.");
+                    Console.WriteLine("Выберите действие:");
+                    Console.WriteLine("1. Просмотреть список товаров");
+                    Console.WriteLine("2. Купить товар");
+                    Console.WriteLine("3. Выйти из программы");
+
+                    int choice;
+                    while (!int.TryParse(Console.ReadLine(), out choice) || choice < 1 || choice > 3)
+                    {
+                        Console.WriteLine("Некорректное выбор. Пожалуйста, введите от 1 до 3.");
+                    }
+
+                    switch (choice)
+                    {
+                        case 1:
+                            ProgramClient.DisplayInstruments(instruments);
+                            break;
+
+                        case 2:
+                            Console.WriteLine("Сколько инструментов Вы хотите приобрести?");
+                            int numInstruments;
+                            while (!int.TryParse(Console.ReadLine(), out numInstruments) || numInstruments <= 0 || numInstruments >= 101)
+                            {
+                                Console.WriteLine("Некорректное количество. Пожалуйста, введите положительное целое число.");
+                            }
+
+                            List<Instrument> selectedInstruments = ProgramClient.SelectInstruments(instruments, numInstruments);
+                            double totalCost = ProgramClient.CalculateTotalCost(selectedInstruments);
+
+                            Console.WriteLine($"Общая сумма заказа: {totalCost} руб.");
+
+                            Console.WriteLine("1 - для оплаты наличными");
+                            Console.WriteLine("2 - для оплаты картой");
+
+                            FileManager.BuyInstruments(selectedInstruments);
+
+                            Console.WriteLine($"Оплата в размере {totalCost} успешно произведена");
+                            break;
+
+                        case 3:
+                            Console.WriteLine("До свидания!");
+                            return;
+                    }
                 }
-
-                List<Instrument> selectedInstruments = ProgramClient.SelectInstruments(instruments, numInstruments);
-                double totalCost = ProgramClient.CalculateTotalCost(selectedInstruments);
-
-                Console.WriteLine($"Общая сумма заказа: {totalCost} руб.");
             }
             else if (mode == 2)
             {
                 // Логика программы для продавца
             }
-            else
+            else if (mode == 3)
             {
-                Console.WriteLine("Некорректный выбор. Пожалуйста, выберите 1 или 2.");
+                Console.WriteLine("До свидания!");
+                Console.ReadKey();
             }
         }
 
         static void OnProcessExit(object sender, EventArgs e)
         {
-            FileReader.WriteInstrumentsToFile("instruments.csv", instruments);
+            FileManager.WriteInstrumentsToFile("instruments.csv", instruments);
         }
 
         static void OnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
-            FileReader.WriteInstrumentsToFile("instruments.csv", instruments);
+            FileManager.WriteInstrumentsToFile("instruments.csv", instruments);
         }
     }
 }
