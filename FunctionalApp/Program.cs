@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -162,6 +163,171 @@ namespace FunctionalApp
     }
     class ProgramCusomer //Функционал программы для продавца
     {
+        public static void ViewInstruments(List<Instrument> instruments) //Функция отображения товара
+        {
+            Console.WriteLine("Список товаров:");
+
+            foreach (var instrument in instruments)
+            {
+                Console.WriteLine($"{instrument.Ind}. {instrument.Brand} {instrument.Type} - {instrument.Price} руб. ({instrument.Quantity} шт.)");
+            }
+        }
+
+        // Функция добавления нового товара
+        public static void AddNewInstrument(List<Instrument> instruments)
+        {
+            int index;
+            string brand;
+            string type;
+            double price;
+            int quantity;
+
+            // Запрашиваем индекс товара
+            while (true)
+            {
+                Console.Write("Введите индекс товара: ");
+                if (!int.TryParse(Console.ReadLine(), out index))
+                {
+                    Console.WriteLine("Ошибка: некорректный формат индекса.");
+                    continue;
+                }
+                if (instruments.Any(i => i.Ind == index))
+                {
+                    Console.WriteLine($"Ошибка: индекс {index} уже существует.");
+                    continue;
+                }
+                break;
+            }
+
+            // Запрашиваем бренд товара
+            while (true)
+            {
+                Console.Write("Введите бренд товара: ");
+                brand = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(brand))
+                {
+                    Console.WriteLine("Ошибка: бренд не может быть пустым.");
+                    continue;
+                }
+                break;
+            }
+
+            // Запрашиваем вид инструмента
+            while (true)
+            {
+                Console.Write("Введите вид инструмента: ");
+                type = Console.ReadLine();
+                if (string.IsNullOrWhiteSpace(type))
+                {
+                    Console.WriteLine("Ошибка: вид инструмента не может быть пустым.");
+                    continue;
+                }
+                break;
+            }
+
+            // Запрашиваем цену товара
+            while (true)
+            {
+                Console.Write("Введите цену товара: ");
+                if (!double.TryParse(Console.ReadLine(), out price))
+                {
+                    Console.WriteLine("Ошибка: некорректный формат цены.");
+                    continue;
+                }
+                break;
+            }
+
+            // Запрашиваем количество товара
+            while (true)
+            {
+                Console.Write("Введите количество товара: ");
+                if (!int.TryParse(Console.ReadLine(), out quantity))
+                {
+                    Console.WriteLine("Ошибка: некорректный формат количества.");
+                    continue;
+                }
+                break;
+            }
+
+            // Показываем информацию о новом товаре и запрашиваем подтверждение
+            Console.WriteLine($"Вы добавляете новый товар: {index};{brand};{type};{price};{quantity}");
+            Console.Write("Введите Y, чтобы подтвердить, или любой другой символ, чтобы отменить: ");
+            if (Console.ReadLine().ToLower() != "y")
+            {
+                Console.WriteLine("Добавление нового товара отменено.");
+                return;
+            }
+
+            // Добавляем новый товар в список и сохраняем в файл
+            instruments.Add(new Instrument(index, brand, type, price, quantity));
+            Console.WriteLine("Новый товар успешно добавлен.");
+        }
+
+        public static void EditInstrument(List<Instrument> instruments, int EditIndex)
+        {
+            var instrument = instruments.FirstOrDefault(i => i.Ind == EditIndex);
+
+            if (instrument != null)
+            {
+                Console.WriteLine($"Найден товар: {instrument}");
+                Console.WriteLine("Введите номер поля, которое нужно изменить (1 - бренд, 2 - вид инструмента, 3 - цена, 4 - количество):");
+                int fieldNumber = int.Parse(Console.ReadLine());
+
+                switch (fieldNumber)
+                {
+                    case 1:
+                        Console.Write("Введите новый бренд: ");
+                        instrument.Brand = Console.ReadLine();
+                        break;
+                    case 2:
+                        Console.Write("Введите новый вид инструмента: ");
+                        instrument.Type = Console.ReadLine();
+                        break;
+                    case 3:
+                        Console.Write("Введите новую цену: ");
+                        instrument.Price = double.Parse(Console.ReadLine());
+                        break;
+                    case 4:
+                        Console.Write("Введите новое количество: ");
+                        instrument.Quantity = int.Parse(Console.ReadLine());
+                        break;
+                    default:
+                        Console.WriteLine("Ошибка: введен неправильный номер поля.");
+                        break;
+                }
+
+                Console.WriteLine("Товар успешно изменен:");
+                Console.WriteLine(instrument);
+            }
+            else
+            {
+                Console.WriteLine("Товар с таким индексом не найден.");
+            }
+        }
+
+        public static void RemoveInstrument(List<Instrument> instruments)
+        {
+            Console.Write("Введите индекс товара, который нужно удалить: ");
+            int index = int.Parse(Console.ReadLine());
+
+            // поиск товара по индексу
+            Instrument productToRemove = instruments.Find(i => i.Ind == index);
+
+            if (productToRemove == null)
+            {
+                Console.WriteLine("Товар с таким индексом не найден!");
+                return;
+            }
+
+            // вывод информации о товаре, который будет удален
+            Console.WriteLine("Удаляемый товар:");
+            Console.WriteLine(productToRemove);
+
+            // удаление товара из списка
+            instruments.Remove(productToRemove);
+
+            Console.WriteLine("Товар удален из списка!");
+        }
 
     }
 
@@ -223,7 +389,7 @@ namespace FunctionalApp
                         case 2:
                             Console.WriteLine("Сколько инструментов Вы хотите приобрести?");
                             int numInstruments;
-                            while (!int.TryParse(Console.ReadLine(), out numInstruments) || numInstruments <= 0 || numInstruments >= 101)
+                            while (!int.TryParse(Console.ReadLine(), out numInstruments) || numInstruments <= 0 || numInstruments >= instruments.Count)
                             {
                                 Console.WriteLine("Некорректное количество. Пожалуйста, введите положительное целое число.");
                             }
@@ -235,6 +401,12 @@ namespace FunctionalApp
 
                             Console.WriteLine("1 - для оплаты наличными");
                             Console.WriteLine("2 - для оплаты картой");
+
+                            int answer;
+                            while (!int.TryParse(Console.ReadLine(), out answer) || answer < 1 || answer > 2)
+                            {
+                                Console.WriteLine("Некорректное выбор. Пожалуйста, введите от 1 до 2.");
+                            }
 
                             FileManager.BuyInstruments(selectedInstruments);
 
@@ -250,6 +422,61 @@ namespace FunctionalApp
             else if (mode == 2)
             {
                 // Логика программы для продавца
+                while (true)
+                {
+                    Console.WriteLine("Выберите действие:");
+                    Console.WriteLine("1. Просмотреть список товаров");
+                    Console.WriteLine("2. Добавить новый товар");
+                    Console.WriteLine("3. Изменить данные о товаре");
+                    Console.WriteLine("4. Удалить товар");
+                    Console.WriteLine("5. Выйти из программы");
+
+                    int choice;
+                    while (!int.TryParse(Console.ReadLine(), out choice) || choice < 1 || choice > 5)
+                    {
+                        Console.WriteLine("Некорректное выбор. Пожалуйста, введите от 1 до 5.");
+                    }
+
+                    switch (choice)
+                    {
+                        case 1:
+                            ProgramCusomer.ViewInstruments(instruments);
+                            break;
+
+                        case 2:
+                            ProgramCusomer.AddNewInstrument(instruments);
+                            break;
+
+                        case 3:
+                            int index;
+                            while (true)
+                            {
+                                Console.Write("Введите индекс товара: ");
+                                if (!int.TryParse(Console.ReadLine(), out index))
+                                {
+                                    Console.WriteLine("Ошибка: некорректный ввод индекса!");
+                                    continue;
+                                }
+
+                                if (instruments.FirstOrDefault(i => i.Ind == index) == null)
+                                {
+                                    Console.WriteLine("Ошибка: товар с таким индексом не найден!");
+                                    continue;
+                                }
+                                ProgramCusomer.EditInstrument(instruments, index);
+                                break;
+                            }
+                            break;
+
+                        case 4:
+                            ProgramCusomer.RemoveInstrument(instruments);
+                            break;
+
+                        case 5:
+                            Console.WriteLine("До свидания!");
+                            return;
+                    }
+                }
             }
             else if (mode == 3)
             {
