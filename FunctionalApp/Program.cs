@@ -96,18 +96,6 @@ namespace FunctionalApp
 
     class ProgramClient //Функционал программы для клиента
     {
-        public static void DisplayInstrumentList(List<Instrument> instruments, int numInstruments) //Вывод инструментов для покупки
-        {
-            Console.WriteLine("Список инструментов:");
-            int count = 0;
-            foreach (var instrument in instruments)
-            {
-                Console.WriteLine(instrument.ToString());
-                count++;
-                if (count >= numInstruments) break;
-            }
-        }
-
         public static List<Instrument> SelectInstruments(List<Instrument> instruments, int numInstruments)
         {
             Console.WriteLine("Выберите инструменты:");
@@ -171,7 +159,7 @@ namespace FunctionalApp
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(OnProcessExit);
             Console.CancelKeyPress += new ConsoleCancelEventHandler(OnCancelKeyPress);
 
-            instruments = FileReader.ReadInstrumentsFromFile("instruments.txt");
+            instruments = FileReader.ReadInstrumentsFromFile("instruments.csv");
 
             // Вывод меню выбора режима работы программы
             Console.WriteLine("Выберите режим работы программы:");
@@ -196,7 +184,6 @@ namespace FunctionalApp
                     Console.WriteLine("Некорректное количество. Пожалуйста, введите положительное целое число.");
                 }
 
-                ProgramClient.DisplayInstrumentList(instruments, numInstruments);
                 List<Instrument> selectedInstruments = ProgramClient.SelectInstruments(instruments, numInstruments);
                 double totalCost = ProgramClient.CalculateTotalCost(selectedInstruments);
 
@@ -214,12 +201,12 @@ namespace FunctionalApp
 
         static void OnProcessExit(object sender, EventArgs e)
         {
-            FileReader.WriteInstrumentsToFile("instruments.txt", instruments);
+            FileReader.WriteInstrumentsToFile("instruments.csv", instruments);
         }
 
         static void OnCancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
-            FileReader.WriteInstrumentsToFile("instruments.txt", instruments);
+            FileReader.WriteInstrumentsToFile("instruments.csv", instruments);
         }
     }
 }
